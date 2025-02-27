@@ -1,0 +1,167 @@
+{% extends 'plantilla.html' %}
+{% load static %}
+{% block titulo %}Clientes - Gestión de Proyectos Arquitectónicos{% endblock %}
+
+{% block contenido %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Clientes</h1>
+        <a href="{% url 'cliente_form' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nuevo Cliente
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="tablaClientes" class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Correo</th>
+                            <th>Teléfono</th>
+                            <th>Proyectos</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cliente in clientes %}
+                            <tr>
+                                <td>{{ cliente.nombre }} {{ cliente.apellido }}</td>
+                                <td>{{ cliente.correo }}</td>
+                                <td>{{ cliente.telefono }}</td>
+                                <td>{{ cliente.proyectos.count }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'cliente_update' cliente.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="javascript:void(0)" class="btn btn-sm btn-outline-danger"
+                                           onclick="confirmarEliminacion('{% url 'eliminar_cliente' cliente.id %}')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr id="noDataRow">
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        var table = $('#tablaClientes').DataTable({
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+            },
+            responsive: true,
+            pageLength: 10,
+            lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Todos"]],
+            dom: '<"row mb-3"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>' +
+                 '<"row"<"col-sm-12"tr>>' +
+                 '<"row mt-3"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            buttons: [
+                {
+                    extend: 'excel',
+                    text: '<i class="fas fa-file-excel"></i> Excel',
+                    className: 'btn btn-success',
+                    exportOptions: {
+                        columns: [0, 1, 2, 3] // Excluye la columna de acciones
+                    },
+                    title: 'Lista de Clientes - Arquitec',
+                    messageTop: 'Información de todos los clientes registrados',
+                    messageBottom: 'Documento generado el ' + new Date().toLocaleDateString(),
+                    filename: 'Clientes_Arquitec_' + new Date().toISOString().split('T')[0]
+                },
+                {
+                    extend: 'pdf',
+                    text: '<i class="fas fa-file-pdf"></i> PDF',
+                    className: 'btn btn-danger',
+                    exportOptions: {
+                        columns: [0, 1, 2, 3] // Excluye la columna de acciones
+                    },
+                    title: 'Lista de Clientes - Arquitec',
+                    orientation: 'landscape',
+                    pageSize: 'LETTER',
+                    customize: function(doc) {
+                        // Personalización del PDF
+                        doc.styles.tableHeader.fontSize = 12;
+                        doc.styles.tableHeader.alignment = 'left';
+                        doc.styles.tableBodyEven.alignment = 'left';
+                        doc.styles.tableBodyOdd.alignment = 'left';
+
+                        // Añadir fecha en el pie de página
+                        doc.footer = function(currentPage, pageCount) {
+                            return {
+                                text: 'Página ' + currentPage.toString() + ' de ' + pageCount.toString() +
+                                      ' - Documento generado el ' + new Date().toLocaleDateString(),
+                                alignment: 'center',
+                                fontSize: 8
+                            };
+                        };
+                    }
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="fas fa-print"></i> Imprimir',
+                    className: 'btn btn-info text-white',
+                    exportOptions: {
+                        columns: [0, 1, 2, 3]
+                    },
+                    title: 'Lista de Clientes - Arquitec',
+                    messageTop: 'Información de todos los clientes registrados'
+                },
+            ]
+        });
+
+        // Check if the table is empty *after* DataTables initialization
+        if (table.data().count() === 0) {
+            $('#noDataRow').html('<td colspan="5" class="text-center">No hay clientes registrados.</td>');
+        }
+    });
+
+    // Función para confirmar eliminación usando iziToast
+    function confirmarEliminacion(urlEliminar) {
+        iziToast.question({
+            timeout: 20000,
+            close: false,
+            overlay: true,
+            displayMode: 'once',
+            id: 'question',
+            zindex: 999,
+            title: 'Confirmación',
+            message: '¿Está seguro de que desea eliminar este cliente?',
+            position: 'center',
+            buttons: [
+                ['<button><b>SÍ</b></button>', function (instance, toast) {
+                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                    // Redirigir para eliminar
+                    window.location.href = urlEliminar;
+                }, true],
+                ['<button>NO</button>', function (instance, toast) {
+                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                }],
+            ],
+            onClosing: function(instance, toast, closedBy) {
+                console.info('Closing | closedBy: ' + closedBy);
+            },
+            onClosed: function(instance, toast, closedBy) {
+                console.info('Closed | closedBy: ' + closedBy);
+            }
+        });
+    }
+</script>
+{% endblock %}
