@@ -1,0 +1,63 @@
+<!-- proyecto_detail.html -->
+{% extends 'plantilla.html' %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h2>{{ proyecto.nombre }}</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <h4>Información del Proyecto</h4>
+                    <hr>
+                    <p><strong>Descripción:</strong> {{ proyecto.descripcion }}</p>
+                    <p><strong>Cliente:</strong> {{ proyecto.cliente }}</p>
+                    <p><strong>Ubicación:</strong> {{ proyecto.ubicacion }}</p>
+                    <p><strong>Metros cuadrados:</strong> {{ proyecto.metros_cuadrados }} m²</p>
+                    <p><strong>Estado:</strong> {{ proyecto.get_estado_display }}</p>
+                    <p><strong>Presupuesto:</strong> ${{ proyecto.presupuesto }}</p>
+                    
+                    <h4 class="mt-4">Fechas</h4>
+                    <hr>
+                    <p><strong>Inicio del proyecto:</strong> {{ proyecto.fecha_inicio }}</p>
+                    <p><strong>Fecha de finalización estimada:</strong> {{ proyecto.fecha_fin_estimada }}</p>
+                    {% if proyecto.fecha_fin_real %}
+                    <p><strong>Fecha de finalización real:</strong> {{ proyecto.fecha_fin_real }}</p>
+                    {% endif %}
+                    
+                    {% if proyecto.esta_retrasado %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Este proyecto está retrasado.
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Progreso del Proyecto</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="progress mb-3">
+                                <div class="progress-bar" role="progressbar" 
+                                     style="width: {{ proyecto.porcentaje_completado }}%;" 
+                                     aria-valuenow="{{ proyecto.porcentaje_completado }}" 
+                                     aria-valuemin="0" aria-valuemax="100">
+                                    {{ proyecto.porcentaje_completado }}%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <a href="{% url 'proyecto_update' proyecto.pk %}" class="btn btn-warning">Editar</a>
+                <a href="{% url 'proyecto_delete' proyecto.pk %}" class="btn btn-danger">Eliminar</a>
+                <a href="{% url 'proyecto_list' %}" class="btn btn-secondary">Volver a la lista</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

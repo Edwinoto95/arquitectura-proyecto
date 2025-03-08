@@ -83,3 +83,63 @@ def eliminar_cliente(request, id):
     cliente.delete()
     messages.success(request, 'Cliente eliminado correctamente.')
     return redirect('lista_clientes')
+
+
+
+
+
+from django.contrib import messages
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from .models import Proyecto, Cliente
+from .forms import ProyectoForm
+
+# Vistas para Proyecto
+class ProyectoListView(ListView):
+    model = Proyecto
+    template_name = 'proyecto_list.html'
+    context_object_name = 'proyectos'
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        cliente_id = self.request.GET.get('cliente')
+        if cliente_id:
+            queryset = queryset.filter(cliente_id=cliente_id)
+        return queryset
+
+class ProyectoDetailView(DetailView):
+    model = Proyecto
+    template_name = 'proyecto_detail.html'
+    context_object_name = 'proyecto'
+
+class ProyectoCreateView(CreateView):
+    model = Proyecto
+    form_class = ProyectoForm
+    template_name = 'proyecto_form.html'
+    success_url = reverse_lazy('proyecto_list')
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'Proyecto creado correctamente.')
+        return super().form_valid(form)
+
+class ProyectoUpdateView(UpdateView):
+    model = Proyecto
+    form_class = ProyectoForm
+    template_name = 'proyecto_form.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('proyecto_detail', kwargs={'pk': self.object.pk})
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'Proyecto actualizado correctamente.')
+        return super().form_valid(form)
+
+class ProyectoDeleteView(DeleteView):
+    model = Proyecto
+    template_name = 'proyecto_confirm_delete.html'
+    success_url = reverse_lazy('proyecto_list')
+    
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, 'Proyecto eliminado correctamente.')
+        return super().delete(request, *args, **kwargs)

@@ -1,0 +1,187 @@
+{% extends 'plantilla.html' %}
+{% load static %}
+
+{% block titulo %}Proyectos - Gestión de Proyectos Arquitectónicos{% endblock %}
+
+{% block estilos %}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.bootstrap5.min.css">
+    <link rel="stylesheet" href="{% static 'iziToast/dist/css/iziToast.min.css' %}">
+{% endblock %}
+
+{% block contenido %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Proyectos Arquitectónicos</h1>
+        <a href="{% url 'proyecto_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nuevo Proyecto
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            {% if proyectos %}
+            <div class="table-responsive">
+                <table id="tablaProyectos" class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Cliente</th>
+                            <th>Estado</th>
+                            <th>Presupuesto</th>
+                            <th>Porcentaje Completado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for proyecto in proyectos %}
+                            <tr>
+                                <td>{{ proyecto.nombre }}</td>
+                                <td>{{ proyecto.cliente.nombre }} {{ proyecto.cliente.apellido }}</td>
+                                <td>{{ proyecto.get_estado_display }}</td>
+                                <td>${{ proyecto.presupuesto }}</td>
+                                <td>{{ proyecto.porcentaje_completado }}%</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'proyecto_detail' proyecto.pk %}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>
+                                        <a href="{% url 'proyecto_update' proyecto.pk %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="javascript:void(0)" class="btn btn-sm btn-outline-danger"
+                                           onclick="confirmarEliminacion('{% url 'proyecto_delete' proyecto.pk %}', '{{ proyecto.nombre }}')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center">
+                No hay proyectos registrados.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="{% static 'iziToast/dist/js/iziToast.min.js' %}"></script>
+
+    <script>
+        $(document).ready(function() {
+            {% if proyectos %}
+            $('#tablaProyectos').DataTable({
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+                },
+                responsive: true,
+                pageLength: 10,
+                lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Todos"]],
+                dom: '<"row mb-3"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>' +
+                     '<"row"<"col-sm-12"tr>>' +
+                     '<"row mt-3"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        text: '<i class="fas fa-file-excel"></i> Excel',
+                        className: 'btn btn-success',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4]
+                        },
+                        title: 'Lista de Proyectos - Arquitec',
+                        messageTop: 'Información de todos los proyectos registrados',
+                        messageBottom: 'Documento generado el ' + new Date().toLocaleDateString(),
+                        filename: 'Proyectos_Arquitec_' + new Date().toISOString().split('T')[0]
+                    },
+                    {
+                        extend: 'pdf',
+                        text: '<i class="fas fa-file-pdf"></i> PDF',
+                        className: 'btn btn-danger',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4]
+                        },
+                        title: 'Lista de Proyectos - Arquitec',
+                        orientation: 'landscape',
+                        pageSize: 'LETTER',
+                        customize: function(doc) {
+                            doc.styles.tableHeader.fontSize = 12;
+                            doc.styles.tableHeader.alignment = 'left';
+                            doc.styles.tableBodyEven.alignment = 'left';
+                            doc.styles.tableBodyOdd.alignment = 'left';
+
+                            doc.footer = function(currentPage, pageCount) {
+                                return {
+                                    text: 'Página ' + currentPage.toString() + ' de ' + pageCount.toString() +
+                                          ' - Documento generado el ' + new Date().toLocaleDateString(),
+                                    alignment: 'center',
+                                    fontSize: 8
+                                };
+                            };
+                        }
+                    },
+                    {
+                        extend: 'print',
+                        text: '<i class="fas fa-print"></i> Imprimir',
+                        className: 'btn btn-info text-white',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4]
+                        },
+                        title: 'Lista de Proyectos - Arquitec',
+                        messageTop: 'Información de todos los proyectos registrados'
+                    }
+                ],
+                columnDefs: [
+                    { orderable: false, targets: 5 }
+                ]
+            });
+            {% endif %}
+        });
+
+        function confirmarEliminacion(urlEliminar, nombreProyecto) {
+            iziToast.question({
+                timeout: 20000,
+                close: false,
+                overlay: true,
+                displayMode: 'once',
+                id: 'question',
+                zindex: 999,
+                title: 'Confirmación',
+                message: '¿Está seguro de que desea eliminar el proyecto: ' + nombreProyecto + '?',
+                position: 'center',
+                buttons: [
+                    ['<button><b>SÍ</b></button>', function (instance, toast) {
+                        instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                        window.location.href = urlEliminar;
+                        iziToast.success({
+                            title: 'Éxito',
+                            message: 'Proyecto ' + nombreProyecto + ' eliminado correctamente.',
+                            position: 'topRight'
+                        });
+                    }, true],
+                    ['<button>NO</button>', function (instance, toast) {
+                        instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                        iziToast.info({
+                            title: 'Cancelado',
+                            message: 'Eliminación del proyecto ' + nombreProyecto + ' cancelada.',
+                            position: 'topRight'
+                        });
+                    }],
+                ],
+            });
+        }
+    </script>
+{% endblock %}

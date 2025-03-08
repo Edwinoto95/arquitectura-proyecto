@@ -1,0 +1,106 @@
+{% extends 'plantilla.html' %}
+
+{% block contenido %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        {% if form.instance.id %}
+                            Actualizar Proyecto: {{ form.instance.nombre }}
+                        {% else %}
+                            Registrar Nuevo Proyecto
+                        {% endif %}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" autocomplete="off">
+                        {% csrf_token %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.nombre.id_for_label }}" class="form-label">Nombre del Proyecto</label>
+                                {{ form.nombre }}
+                                {% if form.nombre.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.nombre.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.cliente.id_for_label }}" class="form-label">Cliente</label>
+                                {{ form.cliente }}
+                                {% if form.cliente.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.cliente.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.descripcion.id_for_label }}" class="form-label">Descripción</label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.errors %}
+                                <div class="invalid-feedback d-block">{{ form.descripcion.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="{{ form.fecha_inicio.id_for_label }}" class="form-label">Fecha de inicio</label>
+                                {{ form.fecha_inicio }}
+                                {% if form.fecha_inicio.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.fecha_inicio.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="{{ form.fecha_fin_estimada.id_for_label }}" class="form-label">Fecha de finalización estimada</label>
+                                {{ form.fecha_fin_estimada }}
+                                {% if form.fecha_fin_estimada.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.fecha_fin_estimada.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="{{ form.presupuesto.id_for_label }}" class="form-label">Presupuesto ($)</label>
+                                {{ form.presupuesto }}
+                                {% if form.presupuesto.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.presupuesto.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="{{ form.estado.id_for_label }}" class="form-label">Estado</label>
+                                {{ form.estado }}
+                                {% if form.estado.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.estado.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="{{ form.ubicacion.id_for_label }}" class="form-label">Ubicación</label>
+                                {{ form.ubicacion }}
+                                {% if form.ubicacion.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.ubicacion.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="{{ form.metros_cuadrados.id_for_label }}" class="form-label">Metros cuadrados</label>
+                                {{ form.metros_cuadrados }}
+                                {% if form.metros_cuadrados.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.metros_cuadrados.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'proyecto_list' %}" class="btn btn-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-primary">
+                                {% if form.instance.id %}Actualizar{% else %}Guardar{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
