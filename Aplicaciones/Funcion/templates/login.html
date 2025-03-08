@@ -8,9 +8,6 @@
         /* Estilos generales */
         body {
             background-color: #22AEBBFF; /* Verde oscuro */
-
-
-            
             color: #333;
             font-family: sans-serif;
             margin: 0;
@@ -178,6 +175,31 @@
             font-size: 0.9em;
             text-align: center;
         }
+
+        /* Media Queries para responsividad */
+        @media (max-width: 768px) {
+            .login-card {
+                margin-top: 80px;
+            }
+            .header {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                margin-top: 60px;
+            }
+            .header {
+                padding: 10px;
+            }
+            .header h1 {
+                font-size: 1.5em;
+            }
+        }
     </style>
 </head>
 <body>
@@ -213,7 +235,7 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Ingresar</button>
                     <div class="card-footer">
-                        <a href="#"></a>
+                        <a href="#">¿Olvidaste tu contraseña?</a>
                     </div>
                 </form>
             </div>
